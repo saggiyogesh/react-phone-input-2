@@ -16,6 +16,7 @@
 // ['north-america', 'south-america', 'central-america', 'carribean',
 //  'european-union', 'ex-ussr', 'middle-east', 'north-africa']
 
+import { memoize } from 'lodash/function';
 const rawAllCountries = [
   [
     "Afghanistan",
@@ -1475,6 +1476,21 @@ const rawAllCountries = [
 
 let allCountryCodes = {};
 
+function lengthToDots(length) {
+  let str = [];
+  while (length--) {
+    str.push('.')
+  }
+  return str.join('');
+}
+
+const defaultFormat = memoize(function (dialCode) {
+  const dialCodeLen = dialCode.length;
+  const tenDots = '..........'; // taking 10 as default length of phone no.
+  return `+${lengthToDots(dialCodeLen)} ${tenDots}`
+});
+
+
 function addCountryCode(iso2, dialCode, priority) {
   if (!(dialCode in allCountryCodes)) {
     allCountryCodes[dialCode] = [];
@@ -1489,7 +1505,7 @@ const allCountries = [].concat(...rawAllCountries.map((country) => {
     regions: country[1],
     iso2: country[2],
     dialCode: country[3],
-    format: country[4] || undefined,
+    format: country[4] || defaultFormat(country[3]),
     priority: country[5] || 0,
     hasAreaCodes: country[6] ? true : false,
   };
@@ -1497,7 +1513,7 @@ const allCountries = [].concat(...rawAllCountries.map((country) => {
   const areaItems = [];
 
   country[6] && country[6].map((areaCode) => {
-    const areaItem = {...countryItem};
+    const areaItem = { ...countryItem };
     areaItem.regions = country[1];
     areaItem.dialCode = country[3] + areaCode;
     areaItem.isAreaCode = true;

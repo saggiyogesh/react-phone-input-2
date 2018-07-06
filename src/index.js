@@ -26,6 +26,8 @@ class ReactPhoneInput extends React.Component {
     required: PropTypes.bool,
     disabled: PropTypes.bool,
     label: PropTypes.string,
+    error: PropTypes.string,
+    helperText: PropTypes.string,
 
     containerStyle: PropTypes.object,
     inputStyle: PropTypes.object,
@@ -43,6 +45,7 @@ class ReactPhoneInput extends React.Component {
     disableDropdown: PropTypes.bool,
     enableLongNumbers: PropTypes.bool,
     countryCodeEditable: PropTypes.bool,
+    disableCountryGuess: PropTypes.bool,
 
     regions: PropTypes.oneOfType([
       PropTypes.string,
@@ -71,6 +74,9 @@ class ReactPhoneInput extends React.Component {
     name: '',
     required: false,
     disabled: false,
+    label: 'Tel No.',
+    error: '',
+    helperText: '',
 
     containerStyle: {},
     inputStyle: {},
@@ -93,6 +99,7 @@ class ReactPhoneInput extends React.Component {
     disableDropdown: false,
     enableLongNumbers: false,
     countryCodeEditable: true,
+    disableCountryGuess: false,
 
     regions: '',
 
@@ -469,9 +476,11 @@ class ReactPhoneInput extends React.Component {
       // we don't need to send the whole number to guess the country... only the first 6 characters are enough
       // the guess country function can then use memoization much more effectively since the set of input it
       // gets has drastically reduced
-      if (!this.state.freezeSelection || this.state.selectedCountry.dialCode.length > inputNumber.length) {
-        newSelectedCountry = this.guessSelectedCountry(inputNumber.substring(0, 6), this.state.onlyCountries, this.state.defaultCountry);
-        freezeSelection = false;
+      if (!this.props.disableCountryGuess) {
+        if (!this.state.freezeSelection || this.state.selectedCountry.dialCode.length > inputNumber.length) {
+          newSelectedCountry = this.guessSelectedCountry(inputNumber.substring(0, 6), this.state.onlyCountries, this.state.defaultCountry);
+          freezeSelection = false;
+        }
       }
       // let us remove all non numerals from the input
       formattedNumber = this.formatNumber(inputNumber, newSelectedCountry.format);
@@ -721,6 +730,8 @@ class ReactPhoneInput extends React.Component {
           disabled={this.props.disabled}
           name={this.props.name}
           label={this.props.label}
+          error={this.props.error}
+          helperText={this.props.helperText}
           InputProps={{
             startAdornment: <InputAdornment style={{ marginRight: 0 }} position="start"><div
               className={this.props.containerClass}
@@ -771,8 +782,10 @@ class ReactPhoneInput extends React.Component {
   }
 }
 
+export default ReactPhoneInput;
+
 export { countryData };
 
-export default ReactPhoneInput;
+
 
 if (__DEV__) require('./demo.js');
