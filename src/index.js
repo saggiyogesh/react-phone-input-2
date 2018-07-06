@@ -718,7 +718,7 @@ class ReactPhoneInput extends React.Component {
 
     return (
       <React.Fragment>
-        <TextField placeholder={this.state.placeholder}
+        <TextField {...this.props} placeholder={this.state.placeholder}
           onChange={this.handleInput}
           onClick={this.handleInputClick}
           onFocus={this.handleInputFocus}
@@ -727,11 +727,6 @@ class ReactPhoneInput extends React.Component {
           value={formattedNumber}
           inputRef={el => this.numberInputRef = el}
           type="tel"
-          disabled={this.props.disabled}
-          name={this.props.name}
-          label={this.props.label}
-          error={this.props.error}
-          helperText={this.props.helperText}
           InputProps={{
             startAdornment: <InputAdornment style={{ marginRight: 0 }} position="start"><div
               className={this.props.containerClass}
