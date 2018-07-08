@@ -13,6 +13,59 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 
 import './styles.less';
 
+const formatNumber = (text, patternArg, { disableCountryCode, enableLongNumbers, autoFormat }) => {
+  let pattern;
+  if (disableCountryCode && patternArg) {
+    pattern = patternArg.split(' ');
+    pattern.shift();
+    pattern = pattern.join(' ');
+  } else {
+    pattern = patternArg;
+  }
+
+  if (!text || text.length === 0) {
+    return disableCountryCode ? '' : '+';
+  }
+
+  // for all strings with length less than 3, just return it (1, 2 etc.)
+  // also return the same text if the selected country has no fixed format
+  if ((text && text.length < 2) || !pattern || !autoFormat) {
+    return disableCountryCode ? text : `+${text}`;
+  }
+
+  const formattedObject = reduce(pattern, (acc, character) => {
+    if (acc.remainingText.length === 0) {
+      return acc;
+    }
+
+    if (character !== '.') {
+      return {
+        formattedText: acc.formattedText + character,
+        remainingText: acc.remainingText
+      };
+    }
+
+    return {
+      formattedText: acc.formattedText + head(acc.remainingText),
+      remainingText: tail(acc.remainingText)
+    };
+  }, {
+      formattedText: '',
+      remainingText: text.split('')
+    });
+
+  let formattedNumber;
+  if (enableLongNumbers) {
+    formattedNumber = formattedObject.formattedText + formattedObject.remainingText.join('');
+  } else {
+    formattedNumber = formattedObject.formattedText;
+  }
+
+  // Always close brackets
+  if (formattedNumber.includes('(') && !formattedNumber.includes(')')) formattedNumber += ')';
+  return formattedNumber;
+}
+
 class ReactPhoneInput extends React.Component {
   static propTypes = {
     excludeCountries: PropTypes.arrayOf(PropTypes.string),
@@ -348,58 +401,9 @@ class ReactPhoneInput extends React.Component {
   }
 
   formatNumber = (text, patternArg) => {
+    console.log('text', text);
     const { disableCountryCode, enableLongNumbers, autoFormat } = this.props;
-
-    let pattern;
-    if (disableCountryCode && patternArg) {
-      pattern = patternArg.split(' ');
-      pattern.shift();
-      pattern = pattern.join(' ');
-    } else {
-      pattern = patternArg;
-    }
-
-    if (!text || text.length === 0) {
-      return disableCountryCode ? '' : '+';
-    }
-
-    // for all strings with length less than 3, just return it (1, 2 etc.)
-    // also return the same text if the selected country has no fixed format
-    if ((text && text.length < 2) || !pattern || !autoFormat) {
-      return disableCountryCode ? text : `+${text}`;
-    }
-
-    const formattedObject = reduce(pattern, (acc, character) => {
-      if (acc.remainingText.length === 0) {
-        return acc;
-      }
-
-      if (character !== '.') {
-        return {
-          formattedText: acc.formattedText + character,
-          remainingText: acc.remainingText
-        };
-      }
-
-      return {
-        formattedText: acc.formattedText + head(acc.remainingText),
-        remainingText: tail(acc.remainingText)
-      };
-    }, {
-        formattedText: '',
-        remainingText: text.split('')
-      });
-
-    let formattedNumber;
-    if (enableLongNumbers) {
-      formattedNumber = formattedObject.formattedText + formattedObject.remainingText.join('');
-    } else {
-      formattedNumber = formattedObject.formattedText;
-    }
-
-    // Always close brackets
-    if (formattedNumber.includes('(') && !formattedNumber.includes(')')) formattedNumber += ')';
-    return formattedNumber;
+    return formatNumber(text, patternArg, { disableCountryCode, enableLongNumbers, autoFormat })
   }
 
   // Put the cursor to the end of the input (usually after a focus event)
@@ -781,6 +785,6 @@ export default ReactPhoneInput;
 
 export { countryData };
 
-
+export { formatNumber }
 
 if (__DEV__) require('./demo.js');
