@@ -590,9 +590,9 @@ const allCountries = [].concat(
       priority: country[5] || 0
     };
 
-    const hasAreaCodes = country[6] ? true : false;
-    !hasAreaCodes && allCountriesOnly.push({ ...countryItem });
+    allCountriesOnly.push(countryItem);
 
+    const hasAreaCodes = country[6] ? true : false;
     countryItem.hasAreaCodes = hasAreaCodes;
 
     const areaItems = [];
